@@ -1,0 +1,14 @@
+# Use the official PostgreSQL image
+FROM postgres:13
+
+# Install bash and curl (for generating random data)
+RUN apt-get update && apt-get install -y bash curl
+
+# Copy the script into the container
+COPY producer.sh /producer.sh
+
+# Make the script executable
+RUN chmod +x /producer.sh
+
+# Run the script
+CMD ["/producer.sh"]

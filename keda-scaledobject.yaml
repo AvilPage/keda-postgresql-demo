@@ -1,0 +1,55 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: postgres-secret
+  namespace: default
+spec:
+  secretTargetRef:
+    - parameter: host
+      name: postgres-secret
+      key: host
+    - parameter: port
+      name: postgres-secret
+      key: port
+    - parameter: dbName
+      name: postgres-secret
+      key: dbName
+    - parameter: user
+      name: postgres-secret
+      key: user
+    - parameter: password
+      name: postgres-secret
+      key: password
+    - parameter: sslmode
+      name: postgres-secret
+      key: sslmode
+
+---
+
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: task-consumer-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: task-consumer  # Name of the consumer deployment
+  pollingInterval: 1    # How often KEDA checks the metric (in seconds)
+  cooldownPeriod: 1     # How long to wait before scaling down (in seconds)
+  minReplicaCount: 0     # Minimum number of replicas
+  maxReplicaCount: 50    # Maximum number of replicas
+  triggers:
+    - type: postgresql
+      metadata:
+        host: postgres-service  # PostgreSQL service name in Kubernetes
+        port: "5432"            # PostgreSQL port
+        dbName: taskdb          # Database name
+        userName: taskuser          # Database user
+#        password: taskpassword  # Database password
+        passwordFromEnv: PG_PASSWORD  # Database password
+        sslmode: disable        # SSL mode (optional)
+#        connectionStringFromEnv: POSTGRES_CONNECTION_STRING
+        query: "SELECT COUNT(*) FROM tasks WHERE status != 'Completed';"
+        targetQueryValue: "10"  # Scale when the number of incomplete tasks > 5
+      authenticationRef:
+        name: postgres-secret  # Reference the TriggerAuthentication

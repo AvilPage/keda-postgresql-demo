@@ -1,0 +1,14 @@
+# Use the official PostgreSQL image
+FROM postgres:13
+
+# Install bash
+RUN apt-get update && apt-get install -y bash
+
+# Copy the script into the container
+COPY consumer.sh /consumer.sh
+
+# Make the script executable
+RUN chmod +x /consumer.sh
+
+# Run the script
+CMD ["/consumer.sh"]

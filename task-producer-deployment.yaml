@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-producer
+  template:
+    metadata:
+      labels:
+        app: task-producer
+    spec:
+      containers:
+        - name: task-producer
+          image: task-producer
+          imagePullPolicy: Never
